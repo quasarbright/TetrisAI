@@ -1,11 +1,12 @@
 import numpy as np
-I = "PIECE_I"
-J = "PIECE_J"
-L = "PIECE_L"
-Z = "PIECE_Z"
-S = "PIECE_S"
-T = "PIECE_T"
-O = "PIECE_O"
+from vector import Vector
+I = "I"
+J = "J"
+L = "L"
+Z = "Z"
+S = "S"
+T = "T"
+O = "O"
 types = [I, J, L, Z, S, T, O]
 typeToColor = {
     I: (21, 194, 188),  # cyan
@@ -76,9 +77,9 @@ class Tetrimino:
             else:
                 self.rotations = [
                     base,
-                    np.rotate(base, 3),
-                    np.rotate(base, 2),
-                    np.rotate(base, 1)
+                    np.rot90(base, 3),
+                    np.rot90(base, 2),
+                    np.rot90(base, 1)
                 ]
         else:
             self.rotations = rotations
@@ -105,6 +106,8 @@ class Tetrimino:
                 self.kicks[(3, 2)] = [(0, 0),(-2, 0),( 1, 0),(-2,-1),( 1, 2)]
                 self.kicks[(3, 0)] = [(0, 0),( 1, 0),(-2, 0),( 1,-2),(-2, 1)]
                 self.kicks[(0, 3)] = [(0, 0),(-1, 0),( 2, 0),(-1, 2),( 2,-1)]
+            for key in self.kicks:
+                self.kicks[key] = [Vector(x,y) for (x,y) in self.kicks[key]]
         else:
             self.kicks = kicks
     
@@ -132,6 +135,23 @@ class Tetrimino:
     
     def getState(self):
         return self.rotations[self.index]
+    
+    def getActivePositions(self):
+        '''should precompute
+        '''
+        state = self.getState()
+        ans = []
+        for y in range(len(state)):
+            for x in range(len(state[0])):
+                if state[y][x] == 1:
+                    ans.append(Vector(x,y))
+        return ans
+    
+    def reset(self):
+        self.index = 0
+    
+    def getColor(self):
+        return typeToColor[self.pieceType]
 
 prototypes = {t : Tetrimino(t) for t in types}
 
