@@ -6,6 +6,25 @@ class Piece:
     def __init__(self, color):
         self.color = color
 
+'''
+time:
+- DAS
+    - the delay
+    - the rate after the delay
+- gravity
+- stack lock
+- max 1 of each input per frame?
+'''
+
+HOLD = "HOLD"
+RCW = "RCW"
+RCCW = "RCCW"
+LEFT = "LEFT"
+RIGHT = "RIGHT"
+SOFT = "SOFT"
+HARD = "HARD"
+HOLD = "HOLD"
+
 class Game:
     def __init__(self):
         self.width = 10
@@ -17,6 +36,9 @@ class Game:
         # gets refreshed when a piece assimilates into the stack
         self.canHold = True
         self.dead = False
+        self.score = 0
+        self.level = 1
+        self.linesThisLevel = 0
         
         # row zero is bottom
         self.grid = [[None for x in range(self.width)] for y in range(self.height)]
@@ -74,6 +96,11 @@ class Game:
             return self.currentTetrimino.color
         else:
             return None
+        
+    def getLinesGoal(self):
+        '''the number of lines needed to level up
+        '''
+        return self.level * 5
     
     def isInBounds(self, p):
         return p.x >= 0 and p.x < self.width and p.y >= 0 and p.y < self.height
@@ -193,7 +220,27 @@ class Game:
         pass
     
     def onClears(self, clears):
-        pass
+        '''NES scoring, guideline levelling
+        '''
+        # TODO also award for soft dropping?
+        fac = self.level + 1
+        if clears == 1:
+            dlines = 1
+            self.score += 40*fac
+        elif clears == 2:
+            dlines == 3
+            self.score += 100*fac
+        elif clears == 3:
+            dlines = 5
+            self.score += 300*fac
+        elif clears == 4:
+            # BOOM tetris for joseph
+            dlines = 8
+            self.score += 1200*fac
+        self.linesThisLevel += dlines
+        if self.linesThisLevel >= self.getLinesGoal():
+            self.level += 1
+            self.linesThisLevel = 0
 
 
     def hold(self):
