@@ -30,18 +30,19 @@ class Game:
         self.spawnPosition = Vector(3,19)
         self.lastVisibleRow = 19
         self.frameRate = 60
+        self.dangerZone = 13 # last safe height
         
         ## timing
         self.frameCount = 0
 
-        self.lockDelay = 0.5 * self.frameRate
+        self.lockDelay = 0.5 * self.frameRate # half second
         self.lockTime = 0 # time spent on ground
         
-        self.autoShiftDelay = 16
+        self.autoShiftDelay = 16 * self.frameRate / 60
         self.autoRepeatRate = 6
         self.shiftTime = 0 # how long left or right has been held
 
-        self.autoEntryRate = 10
+        self.autoEntryRate = 10 * self.frameRate / 60
         self.spawnWaitTime = 0 # how long to wait until spawning the next piece (after locking)
 
         self.timeSinceDrop = 0
@@ -65,6 +66,8 @@ class Game:
         self.currentTetrimino = None
         self.currentPosition = None
         self.spawnTetrimino()
+
+        self.listeners = []
 
     
     def getUpcomingTetriminos(self):
@@ -136,6 +139,14 @@ class Game:
         frames = seconds * self.frameRate
         return frames
     
+    def getHeight(self):
+        '''the maximum 1-indexed y value of the stack
+        '''
+        for y in range(self.height):
+            if not any(p is not None for p in self.grid[y]):
+                return y # don't sub1 because zero indexing
+        raise RuntimeError
+    
     def isInBounds(self, p):
         return p.x >= 0 and p.x < self.width and p.y >= 0 and p.y < self.height
 
@@ -157,6 +168,9 @@ class Game:
     
     def setPieceAt(self, piece, p):
         self.grid[p.y][p.x] = piece
+    
+    def addListener(self, listener):
+        self.listeners.append(listener)
 
     def updateBag(self):
         if len(self.bag) < 7:
@@ -177,6 +191,8 @@ class Game:
         self.currentTetrimino = tetrimino
         self.currentPosition = self.spawnPosition
         if self.isTetriminoObstructedAt(self.currentTetrimino, self.currentPosition):
+            if not self.dead:
+                self.onDeath()
             self.dead = True
         self.canHold = True
     
@@ -203,6 +219,10 @@ class Game:
             kicks = rotated.rotateCCW()
         if not self.isTetriminoObstructedAt(rotated, self.currentPosition):
             self.currentTetrimino = rotated
+            if isCw:
+                self.onSuccessfulRotateCW()
+            else:
+                self.onSuccessfulRotateCCW()
         else:
             for kick in kicks:
                 p = self.currentPosition + kick
@@ -280,13 +300,24 @@ class Game:
             if all(cantMoveIn(direction) for direction in directions):
                 self.onTSpin()
 
+        oldHeight = self.getHeight()
         for p in self.getTetriminoActivePositions():
             self.setPieceAt(t, p)
         clears = self.clearRows()
+        newHeight = self.getHeight()
         self.onClears(clears)
         self.currentTetrimino = None
         self.spawnRequired = True
         self.spawnWaitTime = self.autoEntryRate
+        enteredDanger = newHeight > self.dangerZone and oldHeight <= self.dangerZone
+        exitedDanger = newHeight <= self.dangerZone and oldHeight > self.dangerZone
+        for listener in self.listeners:
+            listener.onLock()
+            if enteredDanger:
+                listener.onDangerEnter()
+            elif exitedDanger:
+                listener.onDangerExit()
+
     
     def lock(self):
         '''alias for self.assimilateIntoStack
@@ -306,6 +337,13 @@ class Game:
         rccw = RCCW in inputsHeld
         hold = HOLD in inputsHeld
 
+        # allow DAS charging when piece isn't spawned
+        shiftTimeWasZero = self.shiftTime == 0
+        if left != right:
+            self.shiftTime += 1
+        else: # no shift
+            self.shiftTime = 0
+
         if self.spawnRequired:
             if self.spawnWaitTime == 0:
                 self.spawnTetrimino()
@@ -314,27 +352,20 @@ class Game:
                 self.spawnWaitTime -= 1
         else:
             # need else bc there is no tetrimino otherwise
-            if left == right: # no shift
-                self.shiftTime = 0
-            
-            if not (left and right):
-                if self.shiftTime == 0:
+            if left != right:
+                if shiftTimeWasZero:
                     if left:
                         self.moveLeft()
-                        self.shiftTime += 1
                     elif right:
                         self.moveRight()
-                        self.shiftTime += 1
                 elif self.shiftTime > self.autoShiftDelay:
                     # TODO handle ARR < 1 like gravity
                     timeSinceDelay = self.shiftTime - self.autoShiftDelay
                     if timeSinceDelay % self.autoRepeatRate == 0:
                         if left:
                             self.moveLeft()
-                            self.shiftTime += 1
                         elif right:
                             self.moveRight()
-                            self.shiftTime += 1
 
             if rcw and rccw:
                 pass
@@ -385,37 +416,97 @@ class Game:
         if clears == 1:
             dlines = 1
             self.score += 40*fac
+            self.onClear()
         elif clears == 2:
             dlines = 3
             self.score += 100*fac
+            self.onClear()
         elif clears == 3:
             dlines = 5
             self.score += 300*fac
+            self.onClear()
         elif clears == 4:
             # BOOM tetris for joseph
             dlines = 8
             self.score += 1200*fac
+            self.onTetris()
         else:
             dlines = 0
         self.linesThisLevel += dlines
         if self.linesThisLevel >= self.getLinesGoal():
             self.level += 1
             self.linesThisLevel = 0
+            self.onLevelUp()
     
+    def onLevelUp(self):
+        for listener in self.listeners:
+            listener.onLevelUp()
+    
+    def onDeath(self):
+        for listener in self.listeners:
+            listener.onDeath()
+    
+    def onClear(self):
+        '''non-tetris clear
+        '''
+        for listener in self.listeners:
+            listener.onClear()
+
+    def onTetris(self):
+        '''non-tetris clear
+        '''
+        for listener in self.listeners:
+            listener.onTetris()
 
     def onSuccessfulRotateCW(self):
-        self.onSuccessfulAnything()
+        self.onSuccessfulRotate()
 
     def onSuccessfulRotateCCW(self):
-        self.onSuccessfulAnything()
+        self.onSuccessfulRotate()
     
-    def onSuccessfulMoveLeft(self):
+    def onSuccessfulRotate(self):
+        for listener in self.listeners:
+            listener.onSuccessfulRotate()
         self.onSuccessfulAnything()
 
+    def onSuccessfulMoveLeft(self):
+        self.onSuccessfulShift()
+
     def onSuccessfulMoveRight(self):
+        self.onSuccessfulShift()
+    
+    def onSuccessfulShift(self):
+        for listener in self.listeners:
+            listener.onSuccessfulShift()
         self.onSuccessfulAnything()
 
     def onSuccessfulAnything(self):
         '''successful left, right, cw, or ccw
         '''
         self.lockTime = 0
+    
+class GameListener:
+    '''Designed with sound effects in mind
+    '''
+    def onSuccessfulRotate(self):
+        raise NotImplementedError
+    def onSuccessfulShift(self):
+        raise NotImplementedError
+    def onClear(self):
+        raise NotImplementedError
+    def onTetris(self):
+        raise NotImplementedError
+    def onDeath(self):
+        raise NotImplementedError
+    def onLock(self):
+        raise NotImplementedError
+    def onLevelUp(self):
+        raise NotImplementedError
+    def onDangerEnter(self):
+        '''when the stack gets over height 12
+        '''
+        raise NotImplementedError
+    def onDangerExit(self):
+        '''when the stack goes back under height 12
+        '''
+        raise NotImplementedError

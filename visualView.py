@@ -2,10 +2,23 @@ import pygame
 from game import *
 from tetrimino import *
 
-
+# frequency, size, channels, buffersize
+pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
 
-pygame.mixer.music.load('sounds/music.mp3')
+def playMusic():
+    pygame.mixer.music.load('sounds/music.mp3')
+    pygame.mixer.music.play(-1)
+def playFastMusic():
+    pygame.mixer.music.load('sounds/fast_music.mp3')
+    pygame.mixer.music.play(-1)
+clearSound = pygame.mixer.Sound('sounds/clear.wav')
+deathSound = pygame.mixer.Sound('sounds/death.wav')
+levelUpSound = pygame.mixer.Sound('sounds/level_up.wav')
+lockSound = pygame.mixer.Sound('sounds/lock.wav')
+rotateSound = pygame.mixer.Sound('sounds/rotate.wav')
+shiftSound = pygame.mixer.Sound('sounds/shift.wav')
+tetrisSound = pygame.mixer.Sound('sounds/tetris.wav')
 
 size = width, height = 1000,800
 pad = 80
@@ -81,7 +94,7 @@ def drawGame(game, screen):
     pygame.draw.rect(screen, panelColor, holdRect)
     pygame.draw.rect(screen, panelColor, nextRect)
 
-    for y in range(game.lastVisibleRow):
+    for y in range(game.lastVisibleRow+1):
         for x in range(game.width):
             piece = game.getPieceAt(x, y)
             if piece is not None:
@@ -119,15 +132,16 @@ def drawGame(game, screen):
 
     pygame.display.flip()
 
-class VisualView:
+class VisualView(GameListener):
     def __init__(self, game):
         self.game = game
+        self.game.addListener(self)
         self.screen = None
 
     def show(self):
         if self.screen is None:
             self.screen = pygame.display.set_mode(size)
-            pygame.mixer.music.play(-1)
+            playMusic()
         drawGame(self.game, self.screen)
     
     def hide(self):
@@ -136,6 +150,38 @@ class VisualView:
     
     def hasQuit(self):
         return any(event.type == pygame.QUIT for event in pygame.event.get())
+    
+    def onSuccessfulRotate(self):
+        rotateSound.play()
+
+    def onSuccessfulShift(self):
+        shiftSound.play()
+
+    def onClear(self):
+        clearSound.play()
+
+    def onTetris(self):
+        tetrisSound.play()
+
+    def onDeath(self):
+        pygame.mixer.music.stop()
+        deathSound.play()
+
+    def onLock(self):
+        lockSound.play()
+
+    def onLevelUp(self):
+        levelUpSound.play()
+
+    def onDangerEnter(self):
+        '''when the stack gets over height 12
+        '''
+        playFastMusic()
+
+    def onDangerExit(self):
+        '''when the stack goes back under height 12
+        '''
+        playMusic()
 
 
 if __name__ == '__main__':

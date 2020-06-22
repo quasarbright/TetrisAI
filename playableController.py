@@ -21,17 +21,14 @@ class PlayableController:
         game : Game = self.gameFactory()
         view : VisualView = self.viewFactory(game)
         view.show()
-        def shouldLoop():
-            ans = not game.dead
-            ans = ans and not any(event.type == pygame.QUIT for event in pygame.event.get())
-            return ans
-        while shouldLoop():
+        while not any(event.type == pygame.QUIT for event in pygame.event.get()):
             inputsHeld = set() # dups are ok
             keys = pygame.key.get_pressed()
             for key in keymap:
                 if keys[key]:
                     inputsHeld.add(keymap[key])
-            game.update(inputsHeld)
+            if not game.dead:
+                game.update(inputsHeld)
             view.show()
             clock.tick_busy_loop(game.frameRate)
 
