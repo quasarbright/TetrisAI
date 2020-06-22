@@ -72,7 +72,7 @@ class Tetrimino:
                 ])
             else:
                 raise ValueError(f"unknown type: {pieceType}")
-            if type == O:
+            if pieceType == O:
                 self.rotations = [base, base, base, base]
             else:
                 self.rotations = [

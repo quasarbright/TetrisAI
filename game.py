@@ -177,7 +177,7 @@ class Game:
 
     def updateBag(self):
         if len(self.bag) < 7:
-            newTetriminos = [makeTetrimino(pt) for pt in types]
+            newTetriminos = [makeTetrimino(O) for pt in types]
             random.shuffle(newTetriminos)
             self.bag = newTetriminos + self.bag
 
