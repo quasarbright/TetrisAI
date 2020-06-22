@@ -1,6 +1,7 @@
 from tetrimino import *
 from vector import Vector
 import random
+import copy
 
 '''
 time:
@@ -75,6 +76,14 @@ class Game:
         self.spawnTetrimino()
 
         self.listeners = []
+
+    def copy(self):
+        game = copy.copy(self)
+        game.grid = copy.deepcopy(game.grid)
+        game.bag = [t.copy() for t in game.bag]
+        game.currentTetrimino = game.currentTetrimino.copy()
+        game.currentPosition = game.currentPosition.copy()
+        game.listeners = game.listeners[:]
 
     
     def getUpcomingTetriminos(self):
@@ -181,7 +190,7 @@ class Game:
 
     def updateBag(self):
         if len(self.bag) < 7:
-            newTetriminos = [makeTetrimino(O) for pt in types]
+            newTetriminos = [makeTetrimino(pt) for pt in types]
             random.shuffle(newTetriminos)
             self.bag = newTetriminos + self.bag
 
