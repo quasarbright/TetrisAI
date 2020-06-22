@@ -197,6 +197,8 @@ class Game:
             if not self.dead:
                 self.onDeath()
             self.dead = True
+        else:
+            self.dropBy1()
         self.canHold = True
     
     def clearRows(self):
@@ -279,6 +281,7 @@ class Game:
         dy = self.currentPosition.y - ghost.y
         self.score += dy*2
         self.currentPosition = self.getGhostPosition()
+        self.lock()
         self.timeSinceDrop = 0
     
     def hold(self):
@@ -325,6 +328,7 @@ class Game:
                 listener.onDangerEnter()
             elif exitedDanger:
                 listener.onDangerExit()
+        self.lockTime = 0
 
     
     def lock(self):
@@ -407,7 +411,6 @@ class Game:
                 self.lockTime += 1
             if self.lockTime >= self.lockDelay:
                 self.lock()
-                self.lockTime = 0
         
         self.groundPushRegisteredThisFrame = False
         self.frameCount += 1
@@ -479,6 +482,7 @@ class Game:
             self.level += 1
             self.linesThisLevel = 0
             self.onLevelUp()
+        self.score = int(self.score) # fac makes it a float for b2b
             
     
     def onLevelUp(self):
