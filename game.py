@@ -57,6 +57,9 @@ class Game:
         self.score = 0
         self.level = 6
         self.linesThisLevel = 0
+        self.comboCount = 0
+        self.lastClearDifficult = False
+        self.tspinPending = False
         
         # row zero is bottom
         self.grid = [[None for x in range(self.width)] for y in range(self.height)]
@@ -268,8 +271,13 @@ class Game:
         if not self.isTetriminoObstructedAt(self.currentTetrimino, p):
             self.currentPosition = p
             self.timeSinceDrop = 0
+            if self.isSoftDropping:
+                self.score += 1
 
     def hardDrop(self):
+        ghost = self.getGhostPosition()
+        dy = self.currentPosition.y - ghost.y
+        self.score += dy*2
         self.currentPosition = self.getGhostPosition()
         self.timeSinceDrop = 0
     
@@ -406,37 +414,72 @@ class Game:
 
     
     def onTSpin(self):
-        pass
+        self.tspinPending = True
     
     def onClears(self, clears):
         '''NES scoring, guideline levelling
         '''
         # TODO also award for soft dropping?
-        fac = self.level + 1
+        fac = self.level
+    
+        oldDifficult = self.lastClearDifficult
+    
+        tspin = self.tspinPending
+        if tspin:
+            self.tspinPending = False
+    
+        if clears == 4 or (tspin and clears > 0):
+            self.lastClearDifficult = True
+        
+        if oldDifficult and self.lastClearDifficult:
+            # back to back b2b bonus
+            fac *= 3/2
+
+        if clears in [1,2,3]:
+            self.onClear()
+
         if clears == 1:
             dlines = 1
-            self.score += 40*fac
-            self.onClear()
+            if tspin:
+                self.score += 800 * fac
+            else:
+                self.score += 100*fac
         elif clears == 2:
             dlines = 3
-            self.score += 100*fac
-            self.onClear()
+            if tspin:
+                self.score += 1200 * fac
+            else:
+                self.score += 300*fac
         elif clears == 3:
             dlines = 5
-            self.score += 300*fac
-            self.onClear()
+            if tspin:
+                self.score += 1600 * level
+            else:
+                self.score += 500*fac
         elif clears == 4:
             # BOOM tetris for joseph
             dlines = 8
-            self.score += 1200*fac
+            self.score += 800*fac
             self.onTetris()
         else:
             dlines = 0
+            if tspin:
+                self.score = 400 * fac
+        
+        if clears == 0:
+            self.comboCount = 0
+        else:
+            self.comboCount += 1
+        # level, not fac bc no b2b bonus for combo
+        self.score += 50 * self.comboCount * self.level
+        
+
         self.linesThisLevel += dlines
         if self.linesThisLevel >= self.getLinesGoal():
             self.level += 1
             self.linesThisLevel = 0
             self.onLevelUp()
+            
     
     def onLevelUp(self):
         for listener in self.listeners:
