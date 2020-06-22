@@ -5,6 +5,8 @@ from tetrimino import *
 
 pygame.init()
 
+pygame.mixer.music.load('sounds/music.mp3')
+
 size = width, height = 1000,800
 pad = 80
 font = pygame.font.SysFont(pygame.font.get_default_font(), 40)
@@ -125,6 +127,7 @@ class VisualView:
     def show(self):
         if self.screen is None:
             self.screen = pygame.display.set_mode(size)
+            pygame.mixer.music.play(-1)
         drawGame(self.game, self.screen)
     
     def hide(self):
