@@ -38,11 +38,14 @@ class Game:
         self.lockDelay = 0.5 * self.frameRate # half second
         self.lockTime = 0 # time spent on ground
         
-        self.autoShiftDelay = 16 * self.frameRate / 60
-        self.autoRepeatRate = 6
+        self.autoShiftDelay = int(16 * self.frameRate / 60)
+        self.autoRepeatRate = 6 * self.frameRate / 60
+        if self.autoRepeatRate > 1:
+            self.autoRepeatRate = int(self.autoRepeatRate)
         self.shiftTime = 0 # how long left or right has been held
 
-        self.autoEntryRate = 10 * self.frameRate / 60
+        self.autoEntryRate = int(10 * self.frameRate / 60)
+        
         self.spawnWaitTime = 0 # how long to wait until spawning the next piece (after locking)
 
         self.timeSinceDrop = 0
@@ -377,7 +380,13 @@ class Game:
                 elif self.shiftTime > self.autoShiftDelay:
                     # TODO handle ARR < 1 like gravity
                     timeSinceDelay = self.shiftTime - self.autoShiftDelay
-                    if timeSinceDelay % self.autoRepeatRate == 0:
+                    if self.autoRepeatRate < 1:
+                        for i in range(int(1/self.autoRepeatRate)):
+                            if left:
+                                self.moveLeft()
+                            elif right:
+                                self.moveRight()
+                    elif timeSinceDelay % self.autoRepeatRate == 0:
                         if left:
                             self.moveLeft()
                         elif right:
