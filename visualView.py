@@ -130,6 +130,9 @@ class VisualView:
     def hide(self):
         self.screen = None
         pygame.quit()
+    
+    def hasQuit(self):
+        return any(event.type == pygame.QUIT for event in pygame.event.get())
 
 
 if __name__ == '__main__':

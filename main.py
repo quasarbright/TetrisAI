@@ -1,9 +1,10 @@
 from game import Game
 from textView import TextView
+from visualView import VisualView
 from vector import Vector
 
 game = Game()
-view = TextView(game)
+view = VisualView(game)
 
 game.hardDrop()
 game.assimilateIntoStack()
@@ -16,7 +17,5 @@ game.dropBy1()
 game.dropBy1()
 game.dropBy1()
 
-view.print()
-
-
-view.print()
+while not view.hasQuit():
+    view.show()
