@@ -2,10 +2,6 @@ from tetrimino import *
 from vector import Vector
 import random
 
-class Piece:
-    def __init__(self, color):
-        self.color = color
-
 '''
 time:
 - DAS
@@ -85,17 +81,17 @@ class Game:
             ans.append(p+p_)
         return ans
 
-    def getColorAt(self, x, y=None):
-        p = Vector(x,y)
-        if isinstance(x, Vector):
-            p = x
-        piece = self.getPieceAt(x, y)
-        if self.getPieceAt(p) is not None:
-            return piece.color
-        elif any(p_ == p for p_ in self.getTetriminoActivePositions(self.currentTetrimino)):
-            return self.currentTetrimino.color
-        else:
-            return None
+    # def getColorAt(self, x, y=None):
+    #     p = Vector(x,y)
+    #     if isinstance(x, Vector):
+    #         p = x
+    #     piece = self.getPieceAt(x, y)
+    #     if self.getPieceAt(p) is not None:
+    #         return piece.color
+    #     elif any(p_ == p for p_ in self.getTetriminoActivePositions(self.currentTetrimino)):
+    #         return self.currentTetrimino.color
+    #     else:
+    #         return None
         
     def getLinesGoal(self):
         '''the number of lines needed to level up
@@ -197,9 +193,9 @@ class Game:
     def assimilateIntoStack(self):
         '''puts the current tetrimino into the stack and
         spawns a new one. also potentially clears lines'''
-        color = self.currentTetrimino.getColor()
+        t = self.currentTetrimino.pieceType
 
-        if self.currentTetrimino.pieceType == T:
+        if t == T:
             # test for t spin
             # if the piece can't move up, down, left, or right
             directions = [Vector(1, 0), Vector(-1, 0), Vector(0, 1), Vector(0, -1)]
@@ -209,8 +205,8 @@ class Game:
             if all(cantMoveIn(direction) for direction in directions):
                 self.onTSpin()
 
-        for p in (self.currentPosition + p_ for p_ in self.currentTetrimino.getActivePositions()):
-            self.setPieceAt(Piece(color), p)
+        for p in self.getTetriminoActivePositions():
+            self.setPieceAt(t, p)
         self.spawnTetrimino()
         clears = self.clearRows()
         self.onClears(clears)
@@ -237,6 +233,8 @@ class Game:
             # BOOM tetris for joseph
             dlines = 8
             self.score += 1200*fac
+        else:
+            dlines = 0
         self.linesThisLevel += dlines
         if self.linesThisLevel >= self.getLinesGoal():
             self.level += 1
