@@ -50,6 +50,7 @@ class Game:
         ## flags and counts
         self.canHold = True
         self.isSoftDropping = False
+        self.softDropCount = 0
         self.rotateReleased = True
         self.hardReleased = True
         self.spawnRequired = False
@@ -274,7 +275,7 @@ class Game:
             self.currentPosition = p
             self.timeSinceDrop = 0
             if self.isSoftDropping:
-                self.score += 1
+                self.softDropCount += 1
 
     def hardDrop(self):
         ghost = self.getGhostPosition()
@@ -294,6 +295,7 @@ class Game:
             self.spawnTetrimino(self.holdTetrimino)
             self.holdTetrimino = temp
             self.canHold = False
+            self.softDropCount = 0
 
 
     def assimilateIntoStack(self):
@@ -329,6 +331,8 @@ class Game:
             elif exitedDanger:
                 listener.onDangerExit()
         self.lockTime = 0
+        self.score += self.softDropCount
+        self.softDropCount = 0
 
     
     def lock(self):
@@ -476,7 +480,6 @@ class Game:
         # level, not fac bc no b2b bonus for combo
         self.score += 50 * self.comboCount * self.level
         
-
         self.linesThisLevel += dlines
         if self.linesThisLevel >= self.getLinesGoal():
             self.level += 1
