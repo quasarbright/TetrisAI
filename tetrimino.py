@@ -152,6 +152,19 @@ class Tetrimino:
     
     def getColor(self):
         return typeToColor[self.pieceType]
+    
+    def __eq__(self, other):
+        if isinstance(other, Tetrimino):
+            sameState = self.getState() == other.getState()
+            if isinstance(sameState, np.ndarray):
+                return sameState.all()
+            else:
+                return sameState
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(tuple(self.getState().flatten()))
 
 prototypes = {t : Tetrimino(t) for t in types}
 

@@ -81,9 +81,11 @@ class Game:
         game = copy.copy(self)
         game.grid = copy.deepcopy(game.grid)
         game.bag = [t.copy() for t in game.bag]
-        game.currentTetrimino = game.currentTetrimino.copy()
+        if game.currentTetrimino is not None:
+            game.currentTetrimino = game.currentTetrimino.copy()
         game.currentPosition = game.currentPosition.copy()
         game.listeners = game.listeners[:]
+        return game
 
     
     def getUpcomingTetriminos(self):
@@ -552,6 +554,28 @@ class Game:
         '''successful left, right, cw, or ccw
         '''
         self.lockTime = 0
+    
+    def keyAttributes(self):
+        grid = tuple(tuple(row) for row in self.grid)
+        bag = tuple(self.bag)
+        return (
+            self.score,
+            self.level,
+            self.currentPosition,
+            self.currentTetrimino,
+            self.holdTetrimino,
+            grid,
+            bag
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, Game):
+            return self.keyAttributes() == other.keyAttributes()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.keyAttributes())
     
 class GameListener:
     '''Designed with sound effects in mind
