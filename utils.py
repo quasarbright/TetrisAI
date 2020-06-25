@@ -15,11 +15,11 @@ if torch.cuda.is_available():
 #     return t
 
 
-# def one_hot(index_batch, length):
-#     t = torch.zeros(len(index_batch), length)
-#     for i, index in enumerate(index_batch):
-#         t[i, index] = 1
-#     return t.to(device)
+def one_hot(index_batch, length):
+    t = torch.zeros(len(index_batch), length)
+    for i, index in enumerate(index_batch):
+        t[i, index] = 1
+    return t.to(device)
 
 
 def path(name):
