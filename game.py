@@ -61,7 +61,7 @@ class Game:
         self.dead = False
         self.score = 0
         self.totalLinesCleared = 0
-        self.level = 6
+        self.level = 33
         self.linesThisLevel = 0
         self.comboCount = 0
         self.lastClearDifficult = False
@@ -85,8 +85,11 @@ class Game:
         if game.currentTetrimino is not None:
             game.currentTetrimino = game.currentTetrimino.copy()
         game.currentPosition = game.currentPosition.copy()
-        game.listeners = game.listeners[:]
+        game.listeners = []
         return game
+    
+    def canMove(self):
+        return self.currentTetrimino is not None
 
     
     def getUpcomingTetriminos(self):
@@ -213,8 +216,8 @@ class Game:
             if not self.dead:
                 self.onDeath()
             self.dead = True
-        else:
-            self.dropBy1()
+        # else:
+            # self.dropBy1()
         self.canHold = True
     
     def clearRows(self):

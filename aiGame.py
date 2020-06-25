@@ -116,13 +116,73 @@ class AIGame:
         a = -0.510066
         c = -0.35663
         d = -0.184483
-        return a * aggregateHeight + c * holes + d * bumpiness    
-
-
-        
+        return a * aggregateHeight + c * holes + d * bumpiness
 
     def __eq__(self, other):
         return isinstance(other, AIGame) and self.game == other.game
 
     def __hash__(self):
         return hash(self.game)
+
+
+class HighLevelAIGame(AIGame):
+    '''Instead of doing individual inputs, a move is a (position, rotation) pair
+    where doing the move hard drops a piece at that x position with that rotation
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    def getLegalActions(self):
+        positions = tuple(range(-5,6))
+        rotations = tuple(range(4))
+        ans = [(p, r) for p in positions for r in rotations]
+        if self.game.canHold and self.game.canMove():
+            ans.append(HOLD)
+        return ans
+        
+    
+    def move(self, action):
+        assert action in self.getLegalActions()
+        ans = self.copy()
+        game = ans.game
+        for inputsHeld in self.generateInputs(action):
+            game.update(inputsHeld)
+        return ans
+    
+    def generateInputs(self, action):
+        assert action in self.getLegalActions()
+        if action == HOLD:
+            return [[HOLD]]
+        ans = self.copy()
+        game = ans.game
+        inputs = []
+        shifts = []
+        rotations = []
+        while not ans.game.canMove():
+            game.update()
+            inputs.append([])
+        position, rotation = action
+        if rotation == 1:
+            rotations.append([RCW])
+        elif rotation == 2:
+            rotations.append([RCW])
+            rotations.append([])
+            rotations.append([RCW])
+        elif rotation == 3:
+            rotations.append([RCCW])
+
+        if position < 0:
+            for _ in range(-position):
+                shifts.append([LEFT])
+                shifts.append([])
+        elif position > 0:
+            for _ in range(position):
+                shifts.append([RIGHT])
+                shifts.append([])
+                
+        inputs += rotations
+        inputs += shifts
+
+        inputs.append([HARD])
+        inputs.append([])
+        return inputs
