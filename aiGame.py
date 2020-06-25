@@ -15,14 +15,14 @@ class AIGame:
             return self.copy()
         else:
             ans = self.copy()
-            ans.game.move([action])
+            ans.game.update([action])
             return ans
 
     def isDead(self):
         return self.game.dead
 
     def score(self):
-        return self.game.score
+        return self.game.score * self.game.frameRate / (self.game.frameCount+1) / 50000
 
     def __eq__(self, other):
         return isinstance(other, AIGame) and self.game == other.game
