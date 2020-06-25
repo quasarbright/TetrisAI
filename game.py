@@ -60,6 +60,7 @@ class Game:
         self.spawnRequired = False
         self.dead = False
         self.score = 0
+        self.totalLinesCleared = 0
         self.level = 6
         self.linesThisLevel = 0
         self.comboCount = 0
@@ -315,6 +316,8 @@ class Game:
     def assimilateIntoStack(self):
         '''puts the current tetrimino into the stack and
         spawns a new one. also potentially clears lines'''
+        if self.currentTetrimino is None:
+            return
         t = self.currentTetrimino.pieceType
 
         if t == T:
@@ -354,6 +357,9 @@ class Game:
         '''
         self.assimilateIntoStack()
         
+    def aiUpdate(self, inputsHeld=[]):
+        self.update([])
+        self.update(inputsHeld)
     
     def update(self,inputsHeld=[]):
         '''advances the game 1 frame
@@ -446,7 +452,7 @@ class Game:
     def onClears(self, clears):
         '''NES scoring, guideline levelling
         '''
-        # TODO also award for soft dropping?
+        self.totalLinesCleared += clears
         fac = self.level
     
         oldDifficult = self.lastClearDifficult
