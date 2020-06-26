@@ -1,4 +1,3 @@
-import sys
 import argparse
 from game import Game
 
