@@ -179,7 +179,15 @@ class HighLevelAIGame(AIGame):
             for _ in range(position):
                 shifts.append([RIGHT])
                 shifts.append([])
-                
+
+        rotShifts = []        
+        for (rotation, shift) in zip(rotations, shifts):
+            rotations.pop(0)
+            shifts.pop(0)
+            rotShifts.append(rotation + shift)
+        
+        inputs += rotShifts
+        
         inputs += rotations
         inputs += shifts
 

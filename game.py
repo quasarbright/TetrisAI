@@ -89,7 +89,7 @@ class Game:
         return game
     
     def canMove(self):
-        return self.currentTetrimino is not None
+        return self.currentTetrimino is not None or self.spawnWaitTime == 1
 
     
     def getUpcomingTetriminos(self):
