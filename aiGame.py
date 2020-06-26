@@ -1,6 +1,4 @@
 from game import *
-import torch
-from utils import *
 import tetrimino
 
 '''
@@ -32,57 +30,12 @@ class AIGame:
             ans = self.copy()
             ans.game.aiUpdate([action])
             return ans
-    
-    def toTensor(self):
-        def oneHotPiece(piece):
-            if piece is None:
-                return [1,0]
-            else:
-                return [0,1]
-        game = self.game.copy()
-        if game.currentTetrimino is not None:
-            for p in game.getTetriminoActivePositions():
-                game.setPieceAt(game.currentTetrimino, p)
-        grid = game.grid
-        grid = grid[:game.lastVisibleRow+1]
-        grid = [[oneHotPiece(piece) for piece in row] for row in grid]
-        grid = torch.tensor(grid).to(device)
-        grid = torch.flatten(grid)
-        
-        def oneHotTetrimino(t, hold=False):
-            if t is None and hold:
-                return [0,0,0,0,0,0,0,1]
-            else:
-                pieceType = t.pieceType
-                index = tetrimino.types.index(pieceType)
-                length = 8 if hold else 7
-                ans = [0 for _ in range(length)]
-                ans[index] = 1
-                return ans
-        hold = self.game.holdTetrimino
-        hold = oneHotTetrimino(hold, hold=True)
-        hold = torch.tensor(hold).to(device)
-
-        nexts = self.game.getUpcomingTetriminos()
-        nexts = [oneHotTetrimino(t) for t in nexts]
-        nexts = torch.tensor(nexts).to(device)
-        nexts = torch.flatten(nexts)
-
-        level = self.game.level
-        level = torch.tensor([level]).to(device)
-        
-        ans = torch.cat([grid, hold, nexts, level], dim=0)
-        ans = ans.unsqueeze(dim=0) # batch
-
-        ans = ans.to(torch.float)
-
-        return ans
 
     def isDead(self):
         return self.game.dead
 
     def score(self):
-        return self.game.score * self.game.frameRate
+        return self.game.score
     
     def heuristicScore(self):
         gridT = [[None for y in range(self.game.lastVisibleRow+1)] for x in range(self.game.width)]
@@ -119,8 +72,6 @@ class AIGame:
         # lines just cleared
         clears = self.lines - self.prevLines
         
-
-        # completedLines = game.
         a = -0.510066
         b = 0.760666
         c = -0.35663
@@ -191,6 +142,8 @@ class HighLevelAIGame(AIGame):
                 shifts.append([RIGHT])
                 shifts.append([])
 
+        # for some reason, it seems like this caused there to be no RCW rotations. Couldn't figure out why
+        # this is only important in extremely high gravity anyway though
         # rotShifts = []        
         # for (rotation, shift) in zip(rotations, shifts):
         #     rotations.pop(0)
