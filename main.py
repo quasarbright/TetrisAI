@@ -1,51 +1,33 @@
 import sys
-import random
+import argparse
 from game import Game
-from textView import TextView
-from visualView import VisualView
-from playableController import PlayableController
-from aiController import *
-import montecarlo
-import minimax
-from vector import Vector
-from aiGame import *
-import torch
-import train
-
-# controller = PlayableController(Game, VisualView)
-# controller.go()
 
 
-fuel = 1
-if len(sys.argv) > 1:
-    fuel = int(sys.argv[1])
+parser = argparse.ArgumentParser(description="Guideline-compliant marathon Tetris. Play it yourself or watch an AI play.")
+group = parser.add_mutually_exclusive_group()
+group.add_argument("--minimax", help="watch the minimax game AI play with given search depth (1 recommended)", metavar="depth", type=int)
+group.add_argument("--manual", help="play the game yourself", action="store_true")
 
-# def choose(game):
-#     return montecarlo.chooseAction(game, fuel)
+args = parser.parse_args()
 
-# actor = train.trainActor(num_epochs=100)
-# actions = train.actions
+if args.minimax:
+    from aiController import *
+    import minimax
+    from aiGame import *
 
-# def choose(game):
-#     state = game.toTensor()
-#     action_logprob, action_index = actor.choose_action(state)
-#     print(action_logprob, action_index)
-#     action = actions[action_index]
-#     return action
+    fuel = args.minimax
 
-# controller = AIController(Game, VisualView, choose)
-# controller.go()
+    def choose(game):
+        return minimax.chooseAction(game, fuel)
 
-# game = AIGame(Game())
-# print(game.toTensor())
-# print(game.toTensor().size())
+    controller = HighLevelController(Game, VisualView, choose)
+    controller.go()
 
-def choose(game):
-    # position = int(input("position:"))
-    # rotation = int(input("rotation:"))
-    # return (position, rotation)
+elif args.manual:
+    from visualView import VisualView
+    from playableController import PlayableController
+    controller = PlayableController(Game, VisualView)
+    controller.go()
 
-    return minimax.chooseAction(game, fuel)
-
-controller = HighLevelController(Game, VisualView, choose)
-controller.go()
+else:
+    parser.print_help()
