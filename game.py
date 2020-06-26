@@ -61,7 +61,7 @@ class Game:
         self.dead = False
         self.score = 0
         self.totalLinesCleared = 0
-        self.level = 33
+        self.level = 6
         self.linesThisLevel = 0
         self.comboCount = 0
         self.lastClearDifficult = False

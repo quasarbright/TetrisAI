@@ -13,9 +13,14 @@ class AIGame:
             self.game = game
         else:
             self.game = Game()
+        self.lines = self.game.totalLinesCleared
+        self.prevLines = self.lines
 
     def copy(self):
-        return AIGame(self.game.copy())
+        ans = AIGame(self.game.copy())
+        ans.lines = self.lines
+        ans.prevLines = ans.lines
+        return ans
 
     def getLegalActions(self):
         return actions + [None]
@@ -111,12 +116,16 @@ class AIGame:
         for h1, h2 in zip(heights,heights[1:]):
             bumpiness += abs(h1-h2)
         
+        # lines just cleared
+        clears = self.lines - self.prevLines
+        
 
         # completedLines = game.
         a = -0.510066
+        b = 0.760666
         c = -0.35663
         d = -0.184483
-        return a * aggregateHeight + c * holes + d * bumpiness
+        return a * aggregateHeight + b * clears + c * holes + d * bumpiness
 
     def __eq__(self, other):
         return isinstance(other, AIGame) and self.game == other.game
@@ -136,8 +145,8 @@ class HighLevelAIGame(AIGame):
         positions = tuple(range(-5,6))
         rotations = tuple(range(4))
         ans = [(p, r) for p in positions for r in rotations]
-        if self.game.canHold and self.game.canMove():
-            ans.append(HOLD)
+        # if self.game.canHold and self.game.canMove():
+        #     ans.append(HOLD)
         return ans
         
     
@@ -145,8 +154,10 @@ class HighLevelAIGame(AIGame):
         assert action in self.getLegalActions()
         ans = self.copy()
         game = ans.game
+        ans.prevLines = ans.lines
         for inputsHeld in self.generateInputs(action):
             game.update(inputsHeld)
+        ans.lines = game.totalLinesCleared
         return ans
     
     def generateInputs(self, action):
@@ -180,13 +191,13 @@ class HighLevelAIGame(AIGame):
                 shifts.append([RIGHT])
                 shifts.append([])
 
-        rotShifts = []        
-        for (rotation, shift) in zip(rotations, shifts):
-            rotations.pop(0)
-            shifts.pop(0)
-            rotShifts.append(rotation + shift)
+        # rotShifts = []        
+        # for (rotation, shift) in zip(rotations, shifts):
+        #     rotations.pop(0)
+        #     shifts.pop(0)
+        #     rotShifts.append(rotation + shift)
         
-        inputs += rotShifts
+        # inputs += rotShifts
         
         inputs += rotations
         inputs += shifts
