@@ -12,7 +12,7 @@ The AI plays at a superhuman level, being able to play at such high levels that 
 
 The AI plays under the same conditions as a human. It has to provide inputs every frame, and even has DAS. It doesn't have access to any information a human wouldn't.
 
-## The algorithm
+# The algorithm
 The game runs at 60 frames per second, so minimax on all possible input sequences is out of the question. I tried monte carlo tree search to no avail, tried the REINFORCE algorithm with neural networks and gave up tweaking hyperparameters, then stopped trying uninformed methods.  
 
 I looked into heuristics online and found [this article](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/) with some good ones. It uses the aggregate height of the stack, the bumpiness of the stack, how many holes are in the stack, and how many lines you're about to clear. The author even gave the optimal weightings of each heuristic! The only problem was that the algorithm in the article just picked a position and orientation to place the piece, rather than performing any inputs like a human. I wanted the AI to have the same conditions as a human, so I came up with a way to take the best of that algorithm and fit it into my problem.
