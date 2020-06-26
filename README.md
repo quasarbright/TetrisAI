@@ -18,3 +18,23 @@ The game runs at 60 frames per second, so minimax on all possible input sequence
 I looked into heuristics online and found [this article](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/) with some good ones. It uses the aggregate height of the stack, the bumpiness of the stack, how many holes are in the stack, and how many lines you're about to clear. The author even gave the optimal weightings of each heuristic! The only problem was that the algorithm in the article just picked a position and orientation to place the piece, rather than performing any inputs like a human. I wanted the AI to have the same conditions as a human, so I came up with a way to take the best of that algorithm and fit it into my problem.
 
 Rather than moves occurring at each frame and the legal actions being inputs, I reframed the problem to moves occurring each tetrimino and actions being an (x position, rotation) pair. The minimax optimizes these high-level actions, rather than low-level inputs. This allows it to look much further into the future. In order to actually perform these high-level actions, they are translated into a sequence of rotation and shift inputs followed by a hard drop input. Each time minimax performs a high-level action while searching, what happens under the hood is that these inputs are ran. Also, rather than optimizing in-game score, the algorithm optimizes the heuristic score exclusively. The combination of limited lookahead depth and hard-drop reward makes in-game score totally impractical as an evaluation metric.
+
+# Requirements
+* numpy
+* pygame
+  
+# Running
+run `python main.py` for usage information:  
+```
+usage: main.py [-h] [--minimax depth | --manual]
+
+Guideline-compliant marathon Tetris. Play it yourself or watch an AI play.
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --minimax depth  watch the minimax game AI play with given search depth (1
+                   recommended)
+  --manual         play the game yourself. left and right to move, down to
+                   soft drop, space to hard drop, z and x to rotate, and shift
+                   to hold
+```
