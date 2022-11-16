@@ -24,3 +24,19 @@ def chooseAction(game, maxDepth=10):
     actions = game.getLegalActions()
     random.shuffle(actions)
     return max(actions, key=valueOfAction)
+
+if __name__ == '__main__':
+    from aiGame import HighLevelAIGame
+    from game import Game
+    from aiController import ReplayController
+    numTimesteps = 10
+    numIterations = 100
+    state = HighLevelAIGame(Game())
+    states = [state.copy()]
+    for t in range(numTimesteps):
+        print(t)
+        action = chooseAction(state, maxDepth=0)
+        state = state.move(action)
+        states.append(state)
+    print(len(states))
+    ReplayController(states, frameRate=1).go()

@@ -36,7 +36,7 @@ class MCTS:
         :param state: current state
         :param numIterations: how many iterations of MCTS to perform, where 1 iteration involves a selection, expansion,
         simulation, and backup.
-        :return: an action, which is a possible member of the result of game.getLegalActions()
+        :return: an action, which is a possible member of the result of state.getLegalActions()
         """
         self.reset()
         for _ in range(numIterations):
@@ -51,11 +51,15 @@ class MCTS:
         """Search the tree for an unexplored state, starting at the given state.
         """
         pairs = []
+        # this is necessary for the first selection since the root state starts out as unvisited
+        action = self.selectionPolicy(state)
+        pairs.append((state, action))
+        state = state.move(action)
         while self.stateVisited(state) and not state.isDead():
             action = self.selectionPolicy(state)
             pairs.append((state, action))
             state = state.move(action)
-        return state
+        return pairs, state
 
     def stateVisited(self, state: AIGame):
         """Has the state been visited during selection?"""
@@ -67,7 +71,7 @@ class MCTS:
         :return: the action to take during selection
         """
         actions = state.getLegalActions()
-        untried = [(state, action) for action in actions if not self.stateActionVisited(state, action)]
+        untried = [action for action in actions if not self.stateActionVisited(state, action)]
         if untried:
             return random.choice(untried)
         else:
@@ -78,12 +82,11 @@ class MCTS:
 
     def stateActionVisited(self, state: AIGame, action) -> bool:
         """Has the state-action pair been visited during selection?"""
-        return self.countStateVisits(state) > 0
+        return self.countStateActionVisits(state, action) > 0
 
     def uct(self, state: AIGame, action) -> float:
         """UCT (Upper Confidence bounds applied to Trees) score for the given state-action pair. Encourages exploration
         """
-        pair = (state, action)
         N_s = self.countStateVisits(state)
         N_a = self.countStateActionVisits(state, action)
         return self.Q(state, action) / self.explorationRate * math.sqrt(math.log(N_s) / N_a)
@@ -148,3 +151,20 @@ def greedyHeuristicPolicy(state: AIGame):
     # random tie breakers
     random.shuffle(actions)
     return max(actions, key=lambda action: state.move(action).heuristicScore())
+
+
+if __name__ == '__main__':
+    from aiGame import HighLevelAIGame
+    from game import Game
+    from aiController import ReplayController
+    numTimesteps = 10
+    numIterations = 100
+    state = HighLevelAIGame(Game())
+    mcts = MCTS(uniformPolicy, maxRolloutLength=numTimesteps)
+    states = [state.copy()]
+    for t in range(numTimesteps):
+        print(t)
+        action = mcts.chooseAction(state, numIterations=numIterations)
+        state = state.move(action)
+        states.append(state)
+    ReplayController(states, frameRate=1).go()

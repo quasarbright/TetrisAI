@@ -70,6 +70,7 @@ class AIGame:
             bumpiness += abs(h1-h2)
         
         # lines just cleared
+        # TODO this is always zero in this class
         clears = self.lines - self.prevLines
         
         a = -0.510066
@@ -91,6 +92,12 @@ class HighLevelAIGame(AIGame):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def copy(self):
+        ans = HighLevelAIGame(self.game.copy())
+        ans.lines = self.lines
+        ans.prevLines = ans.lines
+        return ans
     
     def getLegalActions(self):
         positions = tuple(range(-5,6))

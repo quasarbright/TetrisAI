@@ -1,6 +1,6 @@
 import pygame
 from pygame.time import Clock
-from visualView import VisualView
+from visualView import VisualView, drawGame, size, playMusic
 from game import Game
 from aiGame import AIGame, HighLevelAIGame
 clock = Clock()
@@ -50,6 +50,31 @@ class HighLevelController(AIController):
                 game.update(inputsHeld)
             view.show()
             clock.tick_busy_loop(game.frameRate)
+
+
+class ReplayController:
+    """Display a replay of a game. No sound effects, just music."""
+    def __init__(self, states, frameRate=60):
+        """
+        :param states: states to replay
+        """
+        self.states = states
+        self.frameRate = frameRate
+
+    def go(self):
+        screen = pygame.display.set_mode(size)
+        playMusic()
+        for state in self.states:
+            if any(event.type == pygame.QUIT for event in pygame.event.get()):
+                break
+            print("drawing", hash(state))
+            drawGame(state.game, screen)
+            clock.tick_busy_loop(self.frameRate)
+        # after completing, just show the last state
+        while not any(event.type == pygame.QUIT for event in pygame.event.get()):
+            drawGame(state.game, screen)
+            clock.tick_busy_loop(self.frameRate)
+
 
 # if __name__ == "__main__":
 #     controller = AIController(Game, VisualView)
