@@ -36,7 +36,8 @@ if __name__ == '__main__':
     for t in range(numTimesteps):
         print(t)
         action = chooseAction(state, maxDepth=0)
+        print(action)
         state = state.move(action)
         states.append(state)
-    print(len(states))
+    print(len(states), "states")
     ReplayController(states, frameRate=1).go()

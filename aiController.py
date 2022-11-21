@@ -40,10 +40,15 @@ class HighLevelController(AIController):
         inputQueue = []
         while not any(event.type == pygame.QUIT for event in pygame.event.get()):
             if not game.dead:
+                while game.spawnRequired:
+                    # skip waiting for piece to spawn, makes it look faster
+                    game.update([])
+                # for inputsHeld in HighLevelAIGame(game).generateInputs(self.actionChooser(HighLevelAIGame(game))):
+                #     # 1 frame = 1 move
+                #     game.update(inputsHeld)
                 inputsHeld = []
                 if len(inputQueue) == 0:
                     action = self.actionChooser(HighLevelAIGame(game))
-                    # print(action)
                     inputQueue = HighLevelAIGame(game).generateInputs(action)
                 if len(inputQueue) > 0:
                     inputsHeld = inputQueue.pop(0)
@@ -67,7 +72,6 @@ class ReplayController:
         for state in self.states:
             if any(event.type == pygame.QUIT for event in pygame.event.get()):
                 break
-            print("drawing", hash(state))
             drawGame(state.game, screen)
             clock.tick_busy_loop(self.frameRate)
         # after completing, just show the last state

@@ -17,7 +17,7 @@ class AIGame:
     def copy(self):
         ans = AIGame(self.game.copy())
         ans.lines = self.lines
-        ans.prevLines = ans.lines
+        ans.prevLines = self.prevLines
         return ans
 
     def getLegalActions(self):
@@ -28,7 +28,10 @@ class AIGame:
             return self.copy()
         else:
             ans = self.copy()
+            oldLines = self.lines
             ans.game.aiUpdate([action])
+            ans.prevLines = ans.lines
+            ans.lines = ans.game.totalLinesCleared
             return ans
 
     def isDead(self):
@@ -70,7 +73,6 @@ class AIGame:
             bumpiness += abs(h1-h2)
         
         # lines just cleared
-        # TODO this is always zero in this class
         clears = self.lines - self.prevLines
         
         a = -0.510066
@@ -96,29 +98,38 @@ class HighLevelAIGame(AIGame):
     def copy(self):
         ans = HighLevelAIGame(self.game.copy())
         ans.lines = self.lines
-        ans.prevLines = ans.lines
+        ans.prevLines = self.prevLines
         return ans
     
     def getLegalActions(self):
-        positions = tuple(range(-5,6))
+        positions = tuple(range(-5, 6))
         rotations = tuple(range(4))
         ans = [(p, r) for p in positions for r in rotations]
+        # for heuristic agents, putting a piece down is almost always worse than holding,
+        # so they'll just stall
         # if self.game.canHold and self.game.canMove():
         #     ans.append(HOLD)
         return ans
-        
     
     def move(self, action):
         assert action in self.getLegalActions()
         ans = self.copy()
         game = ans.game
-        ans.prevLines = ans.lines
         for inputsHeld in self.generateInputs(action):
             game.update(inputsHeld)
+        while game.spawnRequired:
+            # wait for new tetrimino to spawn
+            # TODO if you move this before the updates, it breaks main minimax for some reason. Why?
+            # I think it has something to do with the fact that the AI controller does its own version of this method.
+            game.update([])
+        ans.prevLines = ans.lines
         ans.lines = game.totalLinesCleared
         return ans
     
     def generateInputs(self, action):
+        """Generate the low-level inputs for the high level action.
+        Returns a list of input combination lists, where each sublist is the list of inputs for a single frame
+        """
         assert action in self.getLegalActions()
         if action == HOLD:
             return [[HOLD]]
@@ -163,5 +174,7 @@ class HighLevelAIGame(AIGame):
         inputs += shifts
 
         inputs.append([HARD])
+        # this is necessary because we can't do anything right after a hard drop?
+        # also, if we're doing consecutive (0,0), we'd end up holding hard and it'd only do 1
         inputs.append([])
         return inputs
