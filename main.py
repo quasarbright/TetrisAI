@@ -4,12 +4,12 @@ from game import Game
 
 parser = argparse.ArgumentParser(description="Guideline-compliant marathon Tetris. Play it yourself or watch an AI play.")
 group = parser.add_mutually_exclusive_group()
-group.add_argument("--minimax", help="watch the minimax game AI play with given search depth (1 recommended)", metavar="depth", type=int)
+group.add_argument("--minimax", help="watch the minimax game AI play with given search depth (0 recommended)", metavar="depth", type=int)
 group.add_argument("--manual", help="play the game yourself. left and right to move, down to soft drop, space to hard drop, z and x to rotate, and shift to hold", action="store_true")
 
 args = parser.parse_args()
 
-if args.minimax:
+if args.minimax is not None:
     from aiController import *
     import minimax
     from aiGame import *
