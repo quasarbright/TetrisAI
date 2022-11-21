@@ -361,6 +361,7 @@ class Game:
         self.assimilateIntoStack()
         
     def aiUpdate(self, inputsHeld=[]):
+        '''like update, but inserts an empty input to avoid DAS'''
         self.update([])
         self.update(inputsHeld)
     
@@ -382,6 +383,12 @@ class Game:
             self.shiftTime += 1
         else: # no shift
             self.shiftTime = 0
+
+        if not hard:
+            self.hardReleased = True
+
+        if not (rccw or rcw):
+            self.rotateReleased = True
 
         if self.spawnRequired:
             if self.spawnWaitTime == 0:
@@ -414,8 +421,6 @@ class Game:
 
             if rcw and rccw:
                 pass
-            elif not (rccw or rcw):
-                self.rotateReleased = True
             elif rcw and self.rotateReleased:
                 self.rotateCW()
                 self.rotateReleased = False
@@ -427,10 +432,8 @@ class Game:
             if self.canHold and hold:
                 # dw about no piece, we're in the else branch
                 self.hold()
-            
-            if not hard:
-                self.hardReleased = True
-            elif hard and self.hardReleased:
+
+            if hard and self.hardReleased:
                 self.hardDrop()
                 self.hardReleased = False
 
