@@ -1,3 +1,4 @@
 pygame>=1.9.6
 numpy>=1.18.2
 tqdm>=0.0.1
+matplotlib>=3.5.3
