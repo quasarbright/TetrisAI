@@ -365,7 +365,7 @@ class Game:
         self.update([])
         self.update(inputsHeld)
     
-    def update(self,inputsHeld=[]):
+    def update(self, inputsHeld=[]):
         '''advances the game 1 frame
         inputsHeld should contain values like LEFT, RIGHT, SOFT, RCW etc.
         '''
@@ -433,6 +433,7 @@ class Game:
                 # dw about no piece, we're in the else branch
                 self.hold()
 
+            # must check for hard drop after shift/rotate so if you do them simultaneously, you get the shift/rotate
             if hard and self.hardReleased:
                 self.hardDrop()
                 self.hardReleased = False

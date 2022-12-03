@@ -9,7 +9,7 @@ def chooseAction(game, maxDepth=10):
             # print("sssdfsdf")
             return memo[(game, depth)]
         actions = game.getLegalActions()
-        if depth == 0 or len(actions) == 0 or game.isDead():
+        if depth <= 0 or len(actions) == 0 or game.isDead():
             ans = game.heuristicScore()
             memo[(game, depth)] = ans
             return ans
@@ -24,6 +24,7 @@ def chooseAction(game, maxDepth=10):
     actions = game.getLegalActions()
     random.shuffle(actions)
     return max(actions, key=valueOfAction)
+
 
 if __name__ == '__main__':
     from aiGame import HighLevelAIGame

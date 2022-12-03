@@ -126,7 +126,7 @@ class MCTS:
             self.counts[state][action] += 1
 
 
-class HeuristicRolloutMCTS(MCTS):
+class HeuristicEvalMCTS(MCTS):
     """Like ordinary MCTS, but instead of playing rollouts, just evaluate the state using the heuristic score.
     Essentially a more sophisticated heuristic minimax."""
     def __init__(self):
@@ -136,6 +136,18 @@ class HeuristicRolloutMCTS(MCTS):
     def rollout(self, state: AIGame) -> float:
         """Instead of using a rollout policy, evaluate with the heuristic"""
         return state.heuristicScore()
+
+
+class ScoreEvalMCTS(MCTS):
+    """Like ordinary MCTS, but instead of playing rollouts, just evaluate the state using the in-game score.
+    Essentially a more sophisticated naive minimax."""
+    def __init__(self):
+        super().__init__(False)
+
+    # override
+    def rollout(self, state: AIGame) -> float:
+        """Instead of using a rollout policy, evaluate with the heuristic"""
+        return state.score()
 
 
 def uniformPolicy(state: AIGame):
@@ -156,15 +168,14 @@ def greedyHeuristicPolicy(state: AIGame):
 if __name__ == '__main__':
     from aiGame import HighLevelAIGame
     from game import Game
-    from aiController import ReplayController
-    numTimesteps = 10
+    from tqdm.auto import trange
+    numTimesteps = 100
     numIterations = 100
     state = HighLevelAIGame(Game())
-    mcts = MCTS(uniformPolicy, maxRolloutLength=numTimesteps)
+    mcts = HeuristicEvalMCTS()#MCTS(uniformPolicy, maxRolloutLength=numTimesteps)
     states = [state.copy()]
-    for t in range(numTimesteps):
-        print(t)
+    for t in trange(numTimesteps):
         action = mcts.chooseAction(state, numIterations=numIterations)
         state = state.move(action)
         states.append(state)
-    ReplayController(states, frameRate=1).go()
+
