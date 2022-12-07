@@ -1,0 +1,328 @@
+\def\year{2022}\relax
+%File: formatting-instructions-latex-2022.tex
+%release 2022.1
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage{aaai22}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
+%
+% These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+%
+% These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
+\usepackage{newfloat}
+\usepackage{listings}
+\lstset{%
+	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\footnotesize,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
+	aboveskip=0pt,belowskip=0pt,%
+	showstringspaces=false,tabsize=2,breaklines=true}
+\floatstyle{ruled}
+\newfloat{listing}{tb}{lst}{}
+\floatname{listing}{Listing}
+
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\usepackage{hyperref}
+
+%
+%\nocopyright
+%
+% PDF Info Is REQUIRED.
+% For /Title, write your title in Mixed Case.
+% Don't use accents or commands. Retain the parentheses.
+% For /Author, add all authors within the parentheses,
+% separated by commas. No accents, special characters
+% or commands are allowed.
+% Keep the /TemplateVersion tag as is
+\pdfinfo{
+/Title (Playing Tetris With Monte Carlo Tree Search)
+/Author (Mike Delmonaco)
+/TemplateVersion (2022.1)
+}
+
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{color (if used in text)
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fontenc} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{grffile} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \indentfirst} -- This package is specifically forbidden
+% \layout} -- This package is specifically forbidden
+% \multicol} -- This package is specifically forbidden
+% \nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paperr
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai22.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
+\title{Playing Tetris With Monte Carlo Tree Search}
+\author{
+    %Authors
+    % All authors must be in the same font size and format.
+    Mike Delmonaco
+}
+\affiliations{
+    %Afiliations
+  Northeastern University\\
+  delmonaco.m@northeastern.edu
+% See more examples next
+}
+
+%Example, Single Author, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\iffalse
+\title{My Publication Title --- Single Author}
+\author {
+    Author Name
+}
+\affiliations{
+    Affiliation\\
+    Affiliation Line 2\\
+    name@example.com
+}
+\fi
+
+\iffalse
+%Example, Multiple Authors, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\title{My Publication Title --- Multiple Authors}
+\author {
+    % Authors
+    First Author Name,\textsuperscript{\rm 1}
+    Second Author Name, \textsuperscript{\rm 2}
+    Third Author Name \textsuperscript{\rm 1}
+}
+\affiliations {
+    % Affiliations
+    \textsuperscript{\rm 1} Affiliation 1\\
+    \textsuperscript{\rm 2} Affiliation 2\\
+    firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
+}
+\fi
+
+\begin{document}
+
+\newcommand{\tetris}{\emph{Tetris}}
+
+\maketitle
+
+\begin{abstract}
+  \tetris{} is a puzzle video game that involves moving differently shaped pieces as they fall in a grid.
+  \tetris{} is a difficult problem for AI, mainly because of its large state space and the long term planning required to survive and play well.
+  Monte Carlo tree search is well-suited for both of these issues. In this paper, I apply Monte Carlo tree search to \tetris. Several configurations and variants are explored and compared to simple baselines.
+  I found that the highest-performing Monte Carlo tree search agent performs slightly worse than the heuristic minimax baseline agents.
+\end{abstract}
+
+\section{Introduction}
+The game \tetris{} involves moving differently shaped pieces as they fall in a grid.
+The objective of \tetris{} is to arrange pieces such that they form a complete row of squares. This removes the row and grants score. The game ends when the pieces get stacked so high that a new piece doesn't have room to spawn at the top of the grid.
+As the player earns more score, the player's level increases. As the level increases, the rate at which pieces fall after spawning increases, giving the player less time to think and maneuver the piece.
+The fastest way to earn score is to clear 4 lines at ones with a vertical line piece. This is called a tetris.
+
+\tetris{} is a difficult problem to solve with AI for a few reasons:
+
+\begin{itemize}
+  \item{
+        Careful, long-term planning is required to perform a tetris. The player must arrange the pieces in such a way that 4 rows are
+        filled, except for one vertical well that must not be covered from above to prevent a line piece from falling into the well. Since the play field's grid is 10 squares wide and each piece occupies 4 squares, creating this well requires at least
+        nine pieces, and an additional line piece to perform the tetris. This means any tree-search-like agent must plan at least ten pieces ahead in order to see the possibility of a tetris. Additionally, even to simply survive, long-term planning is
+        necessary. It can take a long time to recover from a misplaced piece that prevents the player from clearing a line. If lines aren't cleared, the grid fills up an the player loses.
+        }
+  \item{
+        \tetris{} is played in a grid that is 10 squares wide and at least 20 squares tall (height varies between versions of the game) and each cell may or may not be occupied by a square from one of the falling pieces. This means there are at least \(2^{200}\)
+        possible states. Thus, dynamic programming and tabular methods would be very inefficient.
+        }
+  \item{
+        Due to levels, the environment is non-stationary. However, it is possible to formulate the problem as a stationary MDP if the level is considered part of the state.
+        }
+  \item{
+        The environment is stochastic since the sequence of pieces is generated randomly.
+        }
+\end{itemize}
+
+Monte Carlo tree search is method that is suitable for both of these challenging aspects of the problem. It is capable of efficient long-term planning, can handle large state spaces, non-stationary environments, and stochastic environments.
+
+\section{Background}
+
+\subsection{Tree Search Methods}
+Tree search methods are useful for MDPs with large state spaces. These methods require a simulator of the environment that is capable of playing out multiple possible actions from a state. In general, tree search methods start at the current state,
+try some actions which yield next states, and recur on those next states. They try many different possible sequences of actions and, after a certain number of iterations, choose the ``best'' action in some sense. A simple example
+is minimax, which tries every possible sequence of actions from the current state. Each sequence of actions has some value. For a MDP, this could be the return along the sequence. The next action taken is the first action of the maximum-valued
+sequence.
+
+Minimax is a very simple and straightforward algorithm, but it is ineficcient for high search depths. The asymptotic time complexity of minimax is \(O(b^{d})\), where \(b\) is the number of possible actions at each timestep and \(d\) is the depth
+of the search. Often times, rather than searching to the end of an episode, the search is limited to a certain number of timesteps. This means the optimal action may not be chosen, but it can significantly reduce computation time.
+
+Another common augmentation is using a heuristic to evaluate the final state of a search branch, rather than using the return. The goal is still to optimize the return, but a shallow search optimizing a heuristic designed by domain experts can perform
+very well.
+
+\subsection{Upper Confidence Bounds}
+
+In many RL methods, there is a tradeoff between exploration and exploitation while learning and/or planning. Should the agent explore unseen states and see if there is anything better than what it has experienced? Or should the agent exploit what it has
+learned and follow the path which seems best with its current knowledge? One method to find a balance between these two options is the upper confidence bound (UCB) algorithm. This method is applicable to multi-armed bandit problems and uses the following
+equation to select actions:
+
+\[A_{t} = \argmax_{a}\left[Q_{t}(a) + c \sqrt{\frac{\log t}{N_{t}(a)}}\right]\]
+
+\noindent{}
+where \(c\) is is a hyperparameter that controls the strength of the exploration bonus, \(t\) is the current timestep, and \(N_{t}(a)\) is the number of times the action has been performed.
+
+This equation boosts exploration initially, but the boost diminishes over time since the numerator of the exploration bonus term grows logarithmically with respect to time and the denominator grows linearly. There will always be some exploration, but it will
+decrease over time. This is exactly what we want for an agent ``learning as it goes''. Initially, it should favor exploration to experience the possibilities, but later, it should become more confident in its knowledge and exploit it.
+
+\section{Related Work}
+
+Tabular planning methods like DynaQ can be used to learn
+
+One alternative method that could be applied to this problem is minimax. Minimax, the tree search algorithm described in the previous section, is well-suited for problems with large state spaces. However, its runtime is exponential in the search depth, making it
+impractical for problems which require long-term planning.
+
+\section{Project Description}
+
+\subsection{Markov Decision Process Formulation}
+\tetris{} can be formulated as an MDP. The state is described by the following pieces of data:
+
+\begin{itemize}
+  \item{
+        For each grid cell, a bit, where zero represents an unoccupied cell and one represents an occupied cell.
+        }
+  \item{
+        The shape, position, and rotation of the current piece
+        }
+  \item{
+        The sequence of three previewed piece shapes
+        }
+  \item{
+        The current level number
+        }
+  \item{
+        A bit representing whether the game has ended, where zero represents an unfinished game and 1 represents a game that has ended from the player losing.
+        }
+\end{itemize}
+
+The grid has 10 columns and 20 rows. There are seven piece shapes: I, O, T, S, Z, J, and L. The level number is an integer greater than or equal to six. There is no upper bound. This means, theoretically, the state space is infinite. In practice,
+levels after a certain point (level 29) behave identically. The only thing that changes between levels is the speed at which pieces fall. After level 29, they fall at an entire screen per frame. Levels after this techincally have a higher falling speed,
+but they behave identically. The formulation used in this paper is chosen to mimic what a human would be able to know by looking at a single frame of the screen without having deep knowledge of the game's rules.
+
+There are two formulations of actions that are used in this paper: A low-level raw input formulation that mimics a human's available actions, and a high-level formulation engineered to aid tree searches.
+
+A low-level action consists of 6 bits representing whether the ``move left'', ``move right'', ``rotate clockwise'', ``rotate counter-clockwise'', ``soft drop'', or ``hard drop'' inputs are pressed. Zero represents an unpressed input and 1 represents a pressed input.
+
+A high-level action consists of a horizontal shift and a rotation, which are integers in the ranges \([-5,5]\) and \([0,3]\) respectively, representing the position and orientation at which a piece is placed.
+
+The transition function is very complicated, with many edge cases. The \tetris{} guideline\footnote{\url{https://tetris.wiki/Tetris_Guideline}} specifies the rules for how pieces move and rotate, scoring, etc. To summarize the relevant rules:
+
+\begin{itemize}
+  \item{
+        Pressing the ``move left'' or ``move right'' inputs move the current piece horizontally one square.
+        }
+  \item{
+        Pressing the ``rotate clockwise'' or ``rotate counter-clockwise'' inputs rotate the current piece.
+        }
+  \item{
+        Pressing and holding the ``soft drop'' input causes the current piece to fall more quickly.
+        }
+  \item{
+        Pressing the ``hard drop'' input causes the current piece to instantly fall and lock into the grid.
+        }
+  \item{
+        When a piece falls to the grid and is on top of an occupied cell, after a few frames, it locks into the grid and the next piece begins to fall.
+        }
+  \item{
+        When a piece locking into the grid causes a row or rows to be completely occupied, it is removed and the grid above it shifts down to replace it.
+        }
+  \item{
+        After a certain number of line clears, the level number increments.
+        }
+  \item{
+        The sequence of next piece shapes is generated randomly.
+        }
+  \item{
+        If a piece spawns and any of its squares are in a position that corresponds to an occupied grid cell, the game ends.
+        }
+\end{itemize}
+
+The reward is zero for all state-action pairs, except for entering a terminal state (one where the bit representing a game's end is one), where it is the in-game score. The in-game score is also quite complicated, and is summarized by the following relevant details:
+
+\begin{itemize}
+  \item{
+        Score is rewarded while the current piece falls.
+        }
+  \item{
+        More score is rewarded for falling while soft dropping.
+        }
+  \item{
+        For hard dropping, the score increases more than if the player soft dropped or let the piece fall naturally.
+        }
+  \item{
+        Score is rewarded for clearing lines. More score is rewarded for clearing multiple lines with a single piece.
+        }
+\end{itemize}
+
+There is no discounting.
+
+\subsection{Monte Carlo Tree Search}
+
+TODO
+
+\section{Experiments}
+
+TODO
+
+\section{Conclusion}
+
+TODO
+
+\end{document}
