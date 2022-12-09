@@ -14,6 +14,7 @@ class AIController:
 
     def go(self):
         game: Game = self.gameFactory()
+        game.lockDelay = 1
         view: VisualView = self.viewFactory(game)
         view.show()
         while not any(event.type == pygame.QUIT for event in pygame.event.get()):
