@@ -1,6 +1,7 @@
 import random
 from game import HOLD
-def chooseAction(game, maxDepth=10):
+def chooseAction(game, maxDepth=10, scoreFun=None):
+    scoreFun = scoreFun or (lambda game: game.heuristicScore())
     # memo shouldn't be global because there can only possibly be a duplicate state 
     # within a single call of chooseAction since the keys are (game, depth) pairs
     memo = {}
@@ -10,7 +11,7 @@ def chooseAction(game, maxDepth=10):
             return memo[(game, depth)]
         actions = game.getLegalActions()
         if depth <= 0 or len(actions) == 0 or game.isDead():
-            ans = game.heuristicScore()
+            ans = scoreFun(game)
             memo[(game, depth)] = ans
             return ans
         else:
