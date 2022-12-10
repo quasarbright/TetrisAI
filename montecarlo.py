@@ -204,13 +204,17 @@ if __name__ == '__main__':
                     # bag change => piece was placed
                     pieceCount += 1
                     bag = state.game.bag[:]
-                    states.append(state)
+                states.append(state)
             statess.append(states)
         return statess
     state = AIGame(Game())
     mcts = ScoreEvalMCTS()
-    numIterations = 10
+    numIterations = 100
+    import minimax
+    import random
     def chooseAction(state):
-        return mcts.chooseAction(state, numIterations=numIterations)
+        return minimax.chooseAction(state, maxDepth=5, scoreFun=lambda state: state.score())
     scoreEvalMCTSLowLevelResults = runLowLevelExperiment(state, chooseAction, numGames=1)
+    from aiController import ReplayController
+    ReplayController(scoreEvalMCTSLowLevelResults[0], frameRate=60).go()
 
