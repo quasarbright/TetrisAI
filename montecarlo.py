@@ -89,6 +89,12 @@ class MCTS:
         """
         N_s = self.countStateVisits(state)
         N_a = self.countStateActionVisits(state, action)
+        # TODO this should be + and c needs to be WAY bigger!!!!!
+        # i'm leaving it for now for experimental consistency but geez this isn't even uct
+        # c needs to be comparable to the returns, so different for score and heuristic
+        # TODO you can get rid of the sqrt by returning the square of uct since it'll have the same comparisons
+        # looks like it'll save 25%.
+        # the repeated N_s is probably worse. That should go too
         return self.Q(state, action) / self.explorationRate * math.sqrt(math.log(N_s) / N_a)
 
     def countStateVisits(self, state: AIGame) -> int:
@@ -169,13 +175,46 @@ if __name__ == '__main__':
     from aiGame import HighLevelAIGame
     from game import Game
     from tqdm.auto import trange
-    numTimesteps = 100
+    # numTimesteps = 100
+    # numIterations = 100
+    # state = HighLevelAIGame(Game())
+    # mcts = HeuristicEvalMCTS()#MCTS(uniformPolicy, maxRolloutLength=numTimesteps)
+    # states = [state.copy()]
+    # for t in trange(numTimesteps):
+    #     action = mcts.chooseAction(state, numIterations=numIterations)
+    #     state = state.move(action)
+    #     states.append(state)
+    def runLowLevelExperiment(initialState: 'AIGame', chooseAction, numPieces=100, maxNumTimesteps=1000,numGames=10):
+        """Run a game with the given policy,
+        cut off after numTimesteps time steps.
+        Run numGames games.
+        Return list of list of states (each game's history)"""
+        statess = []
+        for game in trange(numGames, desc="games loop"):
+            state = initialState.copy()
+            states = [state.copy()]
+            pieceCount = 0
+            bag = state.game.bag[:]
+            for t in trange(maxNumTimesteps, desc=f'game {game}'):
+                if state.isDead() or pieceCount >= numPieces:
+                    break
+                action = chooseAction(state)
+                state = state.move(action)
+                if bag != state.game.bag:
+                    # bag change => piece was placed
+                    pieceCount += 1
+                    bag = state.game.bag[:]
+                states.append(state)
+            statess.append(states)
+        return statess
+    state = AIGame(Game())
+    mcts = ScoreEvalMCTS()
     numIterations = 100
-    state = HighLevelAIGame(Game())
-    mcts = HeuristicEvalMCTS()#MCTS(uniformPolicy, maxRolloutLength=numTimesteps)
-    states = [state.copy()]
-    for t in trange(numTimesteps):
-        action = mcts.chooseAction(state, numIterations=numIterations)
-        state = state.move(action)
-        states.append(state)
+    import minimax
+    import random
+    def chooseAction(state):
+        return minimax.chooseAction(state, maxDepth=5, scoreFun=lambda state: state.score())
+    scoreEvalMCTSLowLevelResults = runLowLevelExperiment(state, chooseAction, numGames=1)
+    from aiController import ReplayController
+    ReplayController(scoreEvalMCTSLowLevelResults[0], frameRate=60).go()
 

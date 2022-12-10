@@ -493,7 +493,7 @@ class Game:
         elif clears == 3:
             dlines = 5
             if tspin:
-                self.score += 1600 * level
+                self.score += 1600 * self.level
             else:
                 self.score += 500*fac
         elif clears == 4:

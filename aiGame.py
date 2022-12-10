@@ -4,6 +4,8 @@ import tetrimino
 '''
 heuristics are from https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
 '''
+# no hold
+actions = [HOLD, RCW, RCCW, LEFT, RIGHT, SOFT, HARD]
 
 class AIGame:
     def __init__(self, game: Game = None):
@@ -24,15 +26,12 @@ class AIGame:
         return actions + [None]
 
     def move(self, action):
-        if action is None:
-            return self.copy()
-        else:
-            ans = self.copy()
-            oldLines = self.lines
-            ans.game.aiUpdate([action])
-            ans.prevLines = ans.lines
-            ans.lines = ans.game.totalLinesCleared
-            return ans
+        ans = self.copy()
+        oldLines = self.lines
+        ans.game.aiUpdate([action])
+        ans.prevLines = ans.lines
+        ans.lines = ans.game.totalLinesCleared
+        return ans
 
     def isDead(self):
         return self.game.dead
